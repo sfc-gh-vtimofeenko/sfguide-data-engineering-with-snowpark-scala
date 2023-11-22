@@ -50,7 +50,7 @@ public class LocalSessionHelper {
             System.out.println("Unable to find project root directory");
             propertiesFile = new File(PROPERTIES_FILE_NAME);
         }
-
+        System.out.println("Using properties file: " + propertiesFile.getAbsolutePath());
         try (InputStream input = new FileInputStream(propertiesFile)) {
             properties.load(input);
             // Get passphrase from environment variable
