@@ -1,6 +1,6 @@
 /*-----------------------------------------------------------------------------
 Hands-On Lab: Data Engineering with Snowpark Java
-Script:       11_teardown.sql
+Script:       10_teardown.sql
 Author:       Jeremiah Hansen, Keith Gaputis
 Last Updated: 11/6/2023
 -----------------------------------------------------------------------------*/

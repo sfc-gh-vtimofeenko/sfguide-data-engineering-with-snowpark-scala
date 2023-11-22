@@ -19,13 +19,13 @@ Create a `snowflake.properties` file in the project root folder. This will be re
 An example has been provided in `snowflake.properties.example`.
 
 ## Lab Steps (Part 1)
-- Follow the SQL instructions in `sql/01_setup_snowflake.sql` to prepare your Snowflake account
-- Run `Step02_LoadRawData` Java program from local machine
-- Follow the SQL instructions in `sql/03_load_weather.sql` to configure the Frostbyte weather data share
-- Run `Step04_CreatePOSView` Java program from local machine
-- Review Java code in `Step05_FarenheitToCelsiusUDF`
-- Review Java code in `Step06_UpdateOrdersProcedure`
-- Review Java code in `Step07_UpdateDailyCityMetricsProcedure`
+1. Follow the SQL instructions in `sql/01_setup_snowflake.sql` to prepare your Snowflake account for the lab.
+2. Run `Step02_LoadRawData` Java program (from your local machine) to ingest raw data from S3 into Snowflake.
+3. Follow the SQL instructions in `sql/03_load_weather.sql` to configure the Frostbyte weather data share in your Snowflake account.
+4. Run `Step04_CreatePOSView` Java program (from your local machine) to create a flattened view (and corresponding stream object) for POS data.
+5. Review Java code in `Step05_FarenheitToCelsiusUDF`. This contains a Java UDF that will be used in Step 7.
+6. Review Java code in `Step06_UpdateOrdersProcedure`.  This contains a Java stored procedure that will merge data from the flattened POS view into the `orders` table.
+7. Review Java code in `Step07_UpdateDailyCityMetricsProcedure`. This contains a Java stored procedure that will perform various aggregation and transformations to prepare the `daily_city_metrics` table in the `analytics` layer.
 
 ## Deploy UDFs and stored procedures
 
@@ -34,11 +34,9 @@ mvn clean package snowflake:deploy
 ```
 
 ## Lab Steps (Part 2)
-- Follow the SQL instructions in `sql/08_orchestrate_jobs.sql` to configure and execute tasks for Java stored procedures
-- Follow the SQL instructions in `sql/09_process_incrementally.sql` to load additional data for incremental processing
-- Follow the SQL instructions in `sql/11_teardown.sql` to remove assets related to this lab from your Snowflake account.
-
-
+8. Follow the SQL instructions in `sql/08_orchestrate_jobs.sql` to configure and execute tasks that will trigger the Java stored procedures.  These procedures will populate the `orders` and `daily_city_metrics` tables.
+9. Follow the SQL instructions in `sql/09_process_incrementally.sql` to load additional data for incremental processing
+10. Follow the SQL instructions in `sql/10_teardown.sql` to remove assets related to this lab from your Snowflake account.
 
 ## Advanced
 
