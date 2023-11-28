@@ -2,18 +2,17 @@ package com.snowflake.examples.de
 
 import com.snowflake.examples.utils.LocalSession
 import com.snowflake.examples.utils.TableUtils
+import com.snowflake.examples.utils.WithLogging
 import com.snowflake.snowpark.Row
 import com.snowflake.snowpark.Session
 import com.snowflake.snowpark.functions._
-import com.typesafe.scalalogging.Logger
 
 import scala.collection.immutable.HashMap
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
-object Step02_LoadRawData {
-  val logger = Logger(getClass.getName)
+object Step02_LoadRawData extends WithLogging {
 
   val POS_TABLES: List[String] = List(
     "country",
