@@ -38,3 +38,9 @@ object LocalSession {
   }
 
 }
+
+trait WithSession {
+  val session = LocalSession getLocalSession
+  val role = LocalSession getEnv "SNOWSQL_ROLE"
+  session sql s"USE ROLE $role" collect 
+}
