@@ -1,7 +1,7 @@
 package com.snowflake.examples.utils
 
-import com.typesafe.scalalogging.Logger
+import org.slf4j.LoggerFactory
 
 trait WithLogging {
-  val logger = Logger(getClass.getName)
+  val logger = LoggerFactory.getLogger(getClass.getName)
 }
