@@ -43,7 +43,7 @@
             };
           in
           {
-            buildInputs = prev.buildInputs ++ [ snowCliWrapped pkgs.scalafix ];
+            buildInputs = prev.buildInputs ++ [ snowCliWrapped pkgs.scalafix pkgs.maven ];
           })
         ;
         treefmt.programs = {
