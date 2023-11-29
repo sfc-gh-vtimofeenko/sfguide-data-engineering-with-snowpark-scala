@@ -4,9 +4,10 @@ import com.snowflake.examples.utils.TableUtils.tableExists
 import com.snowflake.examples.utils.WithLogging
 import com.snowflake.examples.utils.WithSession
 import com.snowflake.examples.utils.WithWHResize
-import com.snowflake.snowpark.DataFrame
 import com.snowflake.snowpark.Column
+import com.snowflake.snowpark.DataFrame
 import com.snowflake.snowpark.SaveMode
+import com.snowflake.snowpark.Session
 import com.snowflake.snowpark.functions._
 import com.snowflake.snowpark.types.StructField
 import com.snowflake.snowpark.types._
@@ -17,7 +18,7 @@ import scala.util.Try
 
 object Step07_UpdateDailyCityMetricsProcedure extends WithLogging with WithSession with WithWHResize {
 
-  def createMetricsTable(): Try[Unit] = Try {
+  def createMetricsTable(session: Session): Try[Unit] = Try {
     val schemaForDataFile = StructType(
       Seq(
         StructField("DATE", DateType, true),
@@ -38,7 +39,7 @@ object Step07_UpdateDailyCityMetricsProcedure extends WithLogging with WithSessi
 
   }
 
-  def mergeDailyCityMetrics(): Try[Unit] = withWHResize {
+  def mergeDailyCityMetrics(session: Session): Try[Unit] = withWHResize {
 
     /** This allows printing the dataframe while it's being transformed so longer chains of methods don't need to be
       * interrupted
@@ -168,10 +169,10 @@ object Step07_UpdateDailyCityMetricsProcedure extends WithLogging with WithSessi
       .collect
   }
 
-  def execute() = {
+  def execute(session: Session) = {
     // Create the DAILY_CITY_METRICS table if it doesn't exist
     if (!tableExists(session, "ANALYTICS", "DAILY_CITY_METRICS")) {
-      createMetricsTable match {
+      createMetricsTable(session) match {
         case Failure(exception) => {
           logger error s"Could not create table ANALYTICS.DAILY_CITY_METRICS, reason: $exception"
           System exit 1
@@ -180,18 +181,16 @@ object Step07_UpdateDailyCityMetricsProcedure extends WithLogging with WithSessi
       } // TODO: Move to a CreateIfNotExists function?
     }
 
-    mergeDailyCityMetrics
+    mergeDailyCityMetrics(session)
 
     "Successfully processed DAILY_CITY_METRICS"
   }
 
-  /** The main object entrypoint, to be run with sbt "runMain
-    * com.snowflake.examples.de.Step07_UpdateDailyCityMetricsProcedure"
-    *
-    * Modeled after com.snowflake.examples.de.Step07_UpdateDailyCityMetricsProcedure.main in Java quickstart
+  /** Modeled after com.snowflake.examples.de.Step07_UpdateDailyCityMetricsProcedure.main in Java quickstart
     */
   def main(args: Array[String]): Unit = {
-    val output = execute
+    // NOTE: session here will take the local parameters to execute
+    val output = execute(session)
     logger info s"Received output: $output"
     session close
   }
