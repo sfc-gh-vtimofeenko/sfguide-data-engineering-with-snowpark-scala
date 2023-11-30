@@ -2,19 +2,52 @@ package com.snowflake.examples.utils
 
 import com.snowflake.snowpark.Session
 
+import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.util.Properties
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
+
 object LocalSession {
+
+  /** Load properties from snowflake.properties file. If file not found -- return an expected [[scala.util.Failure]]
+    * Otherwise -- rethrow exception
+    */
+  private def createSessionFromPropsFile(): Try[Session] = try {
+    val prop = new Properties()
+    prop.load(new FileInputStream("snowflake.properties"))
+    Success(
+      Session.builder
+        .configs(
+          Map(Seq("URL", "USER", "PASSWORD", "DB", "SCHEMA", "ROLE", "WAREHOUSE") map { key =>
+            (key, prop.getProperty(key))
+          }: _*)
+        )
+        .create
+    )
+  } catch {
+    case e: FileNotFoundException => Failure(e) // OK Failure
+    case t: Exception             => throw t // Not OK failure
+  }
 
   def getLocalSession(): Session = {
 
-    try {
-      createSessionFromSNOWSQLEnvVars()
-    } catch {
-      case e: NullPointerException =>
-        println(
-          "ERROR: Environment variable for Snowflake Connection not found. Please set the SNOWSQL_* environment variables"
-        );
-        e.printStackTrace()
-        null
+    createSessionFromPropsFile() match {
+      case Success(value) => value
+      case Failure(_) => {
+        // Fall back to environment variable
+        try {
+          createSessionFromSNOWSQLEnvVars()
+        } catch {
+          case e: NullPointerException =>
+            println(
+              "ERROR: Environment variable for Snowflake Connection not found. Please set the SNOWSQL_* environment variables"
+            );
+            e.printStackTrace()
+            null
+        }
+      }
     }
   }
 
