@@ -1,19 +1,19 @@
 package com.snowflake.examples.de
 
+import com.snowflake.examples.utils.DataframeHelpers
 import com.snowflake.examples.utils.TableUtils.tableExists
-import com.snowflake.examples.utils.WithLogging
-import com.snowflake.examples.utils.WithSession
+import com.snowflake.examples.utils.WithLocalSession
 import com.snowflake.examples.utils.WithWHResize
 import com.snowflake.snowpark.Column
+import com.snowflake.snowpark.MergeResult
 import com.snowflake.snowpark.Session
-import com.snowflake.snowpark.functions.col
 import com.snowflake.snowpark.functions.current_timestamp
 
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
-object Step06_UpdateOrdersProcedure extends WithLogging with WithSession with WithWHResize {
+object Step06_UpdateOrdersProcedure extends WithLocalSession with WithWHResize with DataframeHelpers {
 
   /** Creates the table called ORDERS */
   private def createOrdersTable(session: Session): Try[Unit] = Try {
@@ -30,7 +30,8 @@ object Step06_UpdateOrdersProcedure extends WithLogging with WithSession with Wi
   }
 
   /** Merges the updates from the stream into HARMONIZED.ORDERS table */
-  private def mergeOrderUpdates(session: Session): Try[Unit] = withWHResize {
+  private def mergeOrderUpdates(session: Session): Try[MergeResult] = withWHResize(
+    session, {
 
     val source = session table "HARMONIZED.POS_FLATTENED_V_STREAM"
     val target = session table "HARMONIZED.ORDERS"
@@ -39,15 +40,22 @@ object Step06_UpdateOrdersProcedure extends WithLogging with WithSession with Wi
       Map(source.schema.names.filter(!_.contains("METADATA")) map { sourceColName =>
         (target.col(sourceColName), source.col(sourceColName))
       }: _*) + (target.col("META_UPDATED_AT") -> current_timestamp())
+      Success(
 
-    target
-      .merge(source, target.col("ORDER_DETAIL_ID").equal_to(source.col("ORDER_DETAIL_ID")))
-      .whenMatched
-      .update(colsToUpdate)
-      .whenNotMatched
-      .insert(colsToUpdate)
-      .collect()
-  }
+
+      Success(
+        target
+          // This method uses the implicit class UpdatableHelpers
+          .merge(source, "ORDER_DETAIL_ID")
+          .whenMatched
+          .update(colsToUpdate)
+          .whenNotMatched
+          .insert(colsToUpdate)
+          .collect()
+      )
+
+    }
+  )
 
   /** Executes the SQL to generate HARMONIZED.ORDERS table
     *
@@ -82,14 +90,6 @@ object Step06_UpdateOrdersProcedure extends WithLogging with WithSession with Wi
     }
 
     "Successfully processed ORDERS"
-  }
-
-  def main(args: Array[String]): Unit = {
-    // NOTE: session here will take the local parameters to execute
-    val output = execute(session)
-
-    logger info s"Received output: $output"
-    session close
   }
 
 }
