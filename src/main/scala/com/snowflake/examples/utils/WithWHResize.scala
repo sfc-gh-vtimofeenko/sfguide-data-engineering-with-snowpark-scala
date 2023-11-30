@@ -1,7 +1,6 @@
 package com.snowflake.examples.utils
 
-import scala.util.Success
-import scala.util.Try
+import com.snowflake.snowpark.Session
 
 trait WithWHResize {
 
