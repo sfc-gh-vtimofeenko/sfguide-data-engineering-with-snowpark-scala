@@ -77,7 +77,14 @@
                 <version>${snowflake.maven.plugin.version}</version>
                 <configuration>
                     <auth>
+                        <!-- Use either environment or the properties file -->
                         <propertiesFile>snowflake.properties</propertiesFile>
+                        <!-- <url>${env.SNOWSQL_ACCOUNT_URL}</url> <!-1- Env vars are supported -1-> -->
+                        <!-- <user>${env.SNOWSQL_USER}</user> -->
+                        <!-- <password>${env.SNOWSQL_PWD}</password> -->
+                        <!-- <role>${env.SNOWSQL_ROLE}</role> -->
+                        <!-- <db>${env.SNOWSQL_DATABASE}</db> -->
+                        <!-- <schema>${env.SNOWSQL_SCHEMA}</schema> -->
                     </auth>
                     <stage>artifacts</stage>
                     <functions>
