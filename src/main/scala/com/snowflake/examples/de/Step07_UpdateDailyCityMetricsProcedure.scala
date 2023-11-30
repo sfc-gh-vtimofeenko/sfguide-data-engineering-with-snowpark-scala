@@ -19,7 +19,7 @@ import scala.util.Try
 
 object Step07_UpdateDailyCityMetricsProcedure extends WithLocalSession with WithWHResize with DataframeHelpers {
 
-  def createMetricsTable(session: Session): Try[Unit] = Try {
+  private def createMetricsTable(session: Session): Try[Unit] = Try {
     val schemaForDataFile = StructType(
       Seq(
         StructField("DATE", DateType, true),
@@ -35,8 +35,8 @@ object Step07_UpdateDailyCityMetricsProcedure extends WithLocalSession with With
       )
     )
 
-    val dcm = session createDataFrame (Seq(), schemaForDataFile)
-    dcm.write.mode(SaveMode.Overwrite) saveAsTable ("ANALYTICS.DAILY_CITY_METRICS")
+    val dcm = session.createDataFrame(Seq(), schemaForDataFile)
+    dcm.write.mode(SaveMode.Overwrite).saveAsTable("ANALYTICS.DAILY_CITY_METRICS")
 
   }
 
@@ -151,10 +151,10 @@ object Step07_UpdateDailyCityMetricsProcedure extends WithLocalSession with With
     if (!tableExists(session, "ANALYTICS", "DAILY_CITY_METRICS")) {
       createMetricsTable(session) match {
         case Failure(exception) => {
-          logger error s"Could not create table ANALYTICS.DAILY_CITY_METRICS, reason: $exception"
+          logger.error(s"Could not create table ANALYTICS.DAILY_CITY_METRICS, reason: $exception")
           System exit 1
         }
-        case Success(value) => logger info "Created table ANALYTICS.DAILY_CITY_METRICS"
+        case Success(_) => logger info "Created table ANALYTICS.DAILY_CITY_METRICS"
       } // TODO: Move to a CreateIfNotExists function?
     }
 
