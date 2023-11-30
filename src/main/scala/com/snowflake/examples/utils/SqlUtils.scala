@@ -13,7 +13,7 @@ object SqlUtils {
   def addRandomSuffix(inputString: String, suffixLength: Integer): String = {
     val randomSuffix = IntStream
       .range(0, suffixLength)
-      .map(i => ALPHANUMERIC.charAt(RANDOM.nextInt(ALPHANUMERIC.length())))
+      .map(_ => ALPHANUMERIC.charAt(RANDOM.nextInt(ALPHANUMERIC.length())))
       .mapToObj(c => String.valueOf(c))
       .collect(Collectors.joining())
     inputString + randomSuffix
