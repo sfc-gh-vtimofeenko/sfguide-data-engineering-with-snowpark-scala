@@ -12,7 +12,7 @@ import scala.util.Try
 
 object Step02_LoadRawData extends WithLocalSession with WithWHResize {
 
-  val POS_TABLES: List[String] = List(
+  val POS_TABLES: Seq[String] = Seq(
     "country",
     "franchise",
     "location",
@@ -22,14 +22,10 @@ object Step02_LoadRawData extends WithLocalSession with WithWHResize {
     "order_detail"
   )
 
-  /** Small dataclass to pass the schema of ingested data
-    *
-    * @param schema
-    * @param tables
-    */
-  case class IngestedSchema(schema: String, tables: List[String])
+  /** Small dataclass to pass the schema of ingested data */
+  case class IngestedSchema(schema: String, tables: Seq[String])
 
-  val CUSTOMER_TABLES: List[String] = List("customer_loyalty")
+  val CUSTOMER_TABLES: Seq[String] = Seq("customer_loyalty")
 
   val S3_PATH_INGEST_CONFIG: HashMap[String, IngestedSchema] =
     HashMap(
@@ -113,10 +109,10 @@ object Step02_LoadRawData extends WithLocalSession with WithWHResize {
     * @return
     *   list of locations for data to be loaded to @tableName
     */
-  def mkTablePaths(tableName: String, baseS3Path: String): List[String] = {
+  def mkTablePaths(tableName: String, baseS3Path: String): Seq[String] = {
     if (PARTITIONED_TABLES contains tableName)
-      Range.inclusive(2019, 2021).map(year => s"$FROSTBYTE_STAGE/$baseS3Path/$tableName/year=$year").toList
-    else List(s"$FROSTBYTE_STAGE/$baseS3Path/$tableName")
+      Range.inclusive(2019, 2021).map(year => s"$FROSTBYTE_STAGE/$baseS3Path/$tableName/year=$year").toSeq
+    else Seq(s"$FROSTBYTE_STAGE/$baseS3Path/$tableName")
 
   }
 
