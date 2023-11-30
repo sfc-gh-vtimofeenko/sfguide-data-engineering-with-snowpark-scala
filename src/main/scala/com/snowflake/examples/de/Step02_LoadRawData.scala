@@ -57,7 +57,7 @@ object Step02_LoadRawData extends WithLocalSession with WithWHResize {
       logger.info(s"Table already exists: $tableName")
     } else {
       logger.info(s"Creating table: $tableName")
-      TableUtils.createTableUsingParquetInference(session, tableName, s3Path);
+      TableUtils.createTableUsingParquetInference(session, tableName, s3Path)
     }
     tableName
   }
@@ -91,7 +91,7 @@ object Step02_LoadRawData extends WithLocalSession with WithWHResize {
           .option("compression", "snappy")
           .option("match_by_column_name", "case_insensitive")
           .parquet(s3Path)
-          .copyInto(value);
+          .copyInto(value)
       }
       case Failure(f) => {
         logger.error(s"Could not create table $tableName, reason: $f")
