@@ -19,3 +19,6 @@ inThisBuild(
     semanticdbVersion := scalafixSemanticdb.revision
   )
 )
+
+scalacOptions += "-Ywarn-unused"
+
