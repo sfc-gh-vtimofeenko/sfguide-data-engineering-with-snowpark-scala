@@ -25,6 +25,7 @@ object LocalSession {
       "PASSWORD" -> getEnv("SNOWSQL_PWD"),
       "DB" -> getEnv("SNOWSQL_DATABASE"),
       "SCHEMA" -> getEnv("SNOWSQL_SCHEMA"),
+      "ROLE" -> getEnv("SNOWSQL_ROLE"),
       "WAREHOUSE" -> getEnv("SNOWSQL_WAREHOUSE")
     )
 
@@ -39,8 +40,38 @@ object LocalSession {
 
 }
 
-trait WithSession {
-  val session = LocalSession getLocalSession
-  val role = LocalSession getEnv "SNOWSQL_ROLE"
-  session sql s"USE ROLE $role" collect 
+/** Allows running an object file on a local machine using sbt.
+  */
+trait WithLocalSession extends WithLogging {
+
+  /** Abstract method to execute the main procedure of the object. Separate from main so it can be deployed as a stored
+    * procedure in Snowflake
+    *
+    * @param session
+    *   Snowpark session, requirement of Snowpark
+    * @return
+    *   string, so status can be reported when it's run as a stored procedure
+    */
+  def execute(session: Session): String
+
+  /** Wrapper around .execute() that creates a session from environment variables */
+  def main(args: Array[String]): Unit = {
+    System getenv ("QUICKSTART_RUN_LOCALLY") match {
+      case "TRUE" => {
+        val session = LocalSession.getLocalSession()
+
+        val output = execute(session)
+
+        logger.info(s"Received output: $output")
+
+        session.close()
+
+      }
+      case _ => {
+        logger.error("This function should be run by sbt on a local machine")
+        System exit 1
+      }
+    }
+  }
+
 }
