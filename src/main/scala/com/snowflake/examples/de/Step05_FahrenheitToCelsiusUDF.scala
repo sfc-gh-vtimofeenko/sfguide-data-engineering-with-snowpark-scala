@@ -5,6 +5,7 @@ class Step05_FahrenheitToCelsiusUDF {
   /** Converts Fahrenheit to Celsius */
   def fahrenheitToCelsius(fahrenheit: Double): Double = (fahrenheit - 32) * 5 / 9
 
+  /** Short demo of the function. Does not need a session */
   def main(args: Array[String]): Unit = {
     val fahrenheit: Double = 98.6
     val celsius = fahrenheitToCelsius(fahrenheit)
