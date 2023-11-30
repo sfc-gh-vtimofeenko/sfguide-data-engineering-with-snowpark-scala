@@ -1,18 +1,16 @@
 package com.snowflake.examples.de
 
-import com.snowflake.examples.utils.LocalSession
 import com.snowflake.examples.utils.TableUtils
-import com.snowflake.examples.utils.WithLogging
-import com.snowflake.snowpark.Row
+import com.snowflake.examples.utils.WithLocalSession
+import com.snowflake.examples.utils.WithWHResize
 import com.snowflake.snowpark.Session
-import com.snowflake.snowpark.functions._
 
 import scala.collection.immutable.HashMap
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
-object Step02_LoadRawData extends WithLogging {
+object Step02_LoadRawData extends WithLocalSession with WithWHResize {
 
   val POS_TABLES: List[String] = List(
     "country",
@@ -126,55 +124,39 @@ object Step02_LoadRawData extends WithLogging {
     *
     * Modeled after com.snowflake.examples.de.Step02_LoadRawData.execute in Java quickstart
     */
-  def execute(session: Session): String = {
-    val wh_name = LocalSession.getEnv("SNOWSQL_WAREHOUSE")
+  def execute(session: Session): String = withWHResize(
+    session, {
+      S3_PATH_INGEST_CONFIG foreach {
+        case (s3Path, value) => {
+          val tableNames: Seq[String] = value.tables
+          val targetSchema: String = value.schema
 
-    session.sql(s"ALTER WAREHOUSE $wh_name SET WAREHOUSE_SIZE = 'XLARGE' WAIT_FOR_COMPLETION = TRUE").collect()
-    S3_PATH_INGEST_CONFIG.foreach {
-      case (s3Path, value) => {
-        val tableNames: List[String] = value.tables
-        val targetSchema: String = value.schema
+          session sql s"USE SCHEMA $targetSchema" collect ()
 
-        session.sql(s"USE SCHEMA $targetSchema").collect()
+          // Generate a map of table x (optionally) locations partitioned by year
+          // Extracted from loadRawTable to make it more functional
+          val tableS3Paths = Map(tableNames map { table => (table, mkTablePaths(table, s3Path)) }: _*)
 
-        // Generate a map of table x (optionally) locations partitioned by year
-        // Extracted from loadRawTable to make it more functional
-        val tableS3Paths = Map(tableNames map { table => (table, mkTablePaths(table, s3Path)) }: _*)
-
-        tableS3Paths.foreach {
-          case (tableName, tablePaths) => {
-            tablePaths.map(s3Path =>
-              loadRawTable(
-                session = session,
-                tableName = tableName,
-                s3Path = s3Path,
-                targetSchema = targetSchema
-              ) match {
-                case Success(_) => logger.info(s"Loaded table $tableName successfully")
-                case Failure(f) => logger.error(s"Could not load table $tableName. Reason: $f")
-              }
-            )
+          tableS3Paths.foreach {
+            case (tableName, tablePaths) => {
+              tablePaths.map(s3Path =>
+                loadRawTable(
+                  session = session,
+                  tableName = tableName,
+                  s3Path = s3Path,
+                  targetSchema = targetSchema
+                ) match {
+                  case Success(_) => logger info s"Loaded table $tableName successfully"
+                  case Failure(f) => logger error s"Could not load table $tableName. Reason: $f"
+                }
+              )
+            }
           }
         }
       }
+
+      "Processing complete"
     }
-    session.sql(s"ALTER WAREHOUSE $wh_name SET WAREHOUSE_SIZE = XSMALL").collect();
-    "Processing complete"
-  }
-
-  /** The main object entrypoint, to be run with sbt "runMain com.snowflake.examples.de.Step02_LoadRawData"
-    *
-    * Modeled after com.snowflake.examples.de.Step02_LoadRawData.main in Java quickstart
-    */
-  def main(args: Array[String]): Unit = {
-    val localSession = LocalSession.getLocalSession()
-
-    val role = LocalSession.getEnv("SNOWSQL_ROLE")
-    localSession.sql(s"USE ROLE $role").collect()
-
-    val output = execute(localSession)
-    logger.info(s"Received output: $output")
-    localSession.close();
-  }
+  )
 
 }
