@@ -1,8 +1,6 @@
 package com.snowflake.examples.de
 
-import com.snowflake.examples.utils.LocalSession
-import com.snowflake.examples.utils.TableUtils
-import com.snowflake.examples.utils.WithLogging
+import com.snowflake.examples.utils.WithLocalSession
 import com.snowflake.snowpark.Session
 import com.snowflake.snowpark.functions._
 
@@ -10,7 +8,7 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
-object Step04_CreatePOSView extends WithLogging {
+object Step04_CreatePOSView extends WithLocalSession {
 
   /** Tries to create a view on top of POS data.
     *
@@ -118,7 +116,7 @@ object Step04_CreatePOSView extends WithLogging {
     *
     * Modeled after com.snowflake.examples.de.Step04_CreatePOSView.execute in Java quickstart
     */
-  private def execute(session: Session) = {
+  def execute(session: Session) = {
     // Set session context
     session sql "use schema harmonized" collect ()
     // First create a view for joining POS data
@@ -138,21 +136,6 @@ object Step04_CreatePOSView extends WithLogging {
       }
     }
     "POS view objects created successfully"
-  }
-
-  /** The main object entrypoint, to be run with sbt "runMain com.snowflake.examples.de.Step04_CreatePOSView"
-    *
-    * Modeled after com.snowflake.examples.de.Step04_CreatePOSView.main in Java quickstart
-    */
-  def main(args: Array[String]): Unit = {
-    val localSession = LocalSession getLocalSession ()
-
-    val role = LocalSession getEnv "SNOWSQL_ROLE"
-    localSession sql s"USE ROLE $role" collect ()
-
-    val output = execute(localSession)
-    logger info s"Received output: $output"
-    localSession close ()
   }
 
 }
