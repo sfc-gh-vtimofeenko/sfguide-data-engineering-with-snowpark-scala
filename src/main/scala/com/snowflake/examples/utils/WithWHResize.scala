@@ -4,14 +4,14 @@ import com.snowflake.snowpark.Session
 
 trait WithWHResize {
 
-  /** Upsizes the warehouse before the warehouse is executed and downsizes it after function is complete
+  /** Upsizes the warehouse before the function is executed and downsizes it after function is complete
     *
     * @param session
     *   a Snowpark session
     * @param f
     *   wrapped function
     * @return
-    *   output of f wrapped into [[scala.util.Success]]
+    *   result of function
     */
   def withWHResize[T](session: Session, f: => T): T = {
     // Not using getEnv since we don't want to change the size of a random warehouse
