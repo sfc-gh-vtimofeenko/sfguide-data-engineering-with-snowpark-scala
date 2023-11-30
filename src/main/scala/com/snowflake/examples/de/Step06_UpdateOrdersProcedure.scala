@@ -17,31 +17,28 @@ object Step06_UpdateOrdersProcedure extends WithLocalSession with WithWHResize w
 
   /** Creates the table called ORDERS */
   private def createOrdersTable(session: Session): Try[Unit] = Try {
-    logger info "Creating ORDERS table"
-    session sql "CREATE TABLE HARMONIZED.ORDERS LIKE HARMONIZED.POS_FLATTENED_V" collect ()
-
-    session sql "ALTER TABLE HARMONIZED.ORDERS ADD COLUMN META_UPDATED_AT TIMESTAMP" collect ()
+    logger.info("Creating ORDERS table")
+    session.sql("CREATE TABLE HARMONIZED.ORDERS LIKE HARMONIZED.POS_FLATTENED_V").collect()
+    session.sql("ALTER TABLE HARMONIZED.ORDERS ADD COLUMN META_UPDATED_AT TIMESTAMP").collect()
   }
 
   /** Creates a stream on a the table called ORDERS */
   private def createOrdersStream(session: Session): Try[Unit] = Try {
-    logger info "Creating ORDERS stream"
-    session sql "CREATE STREAM HARMONIZED.ORDERS_STREAM ON TABLE HARMONIZED.ORDERS" collect ()
+    logger.info("Creating ORDERS stream")
+    session.sql("CREATE STREAM HARMONIZED.ORDERS_STREAM ON TABLE HARMONIZED.ORDERS").collect()
   }
 
   /** Merges the updates from the stream into HARMONIZED.ORDERS table */
   private def mergeOrderUpdates(session: Session): Try[MergeResult] = withWHResize(
     session, {
 
-    val source = session table "HARMONIZED.POS_FLATTENED_V_STREAM"
-    val target = session table "HARMONIZED.ORDERS"
+      val source = session.table("HARMONIZED.POS_FLATTENED_V_STREAM")
+      val target = session.table("HARMONIZED.ORDERS")
 
-    val colsToUpdate: Map[Column, Column] =
-      Map(source.schema.names.filter(!_.contains("METADATA")) map { sourceColName =>
-        (target.col(sourceColName), source.col(sourceColName))
-      }: _*) + (target.col("META_UPDATED_AT") -> current_timestamp())
-      Success(
-
+      val colsToUpdate: Map[Column, Column] =
+        Map(source.schema.names.filter(!_.contains("METADATA")) map { sourceColName =>
+          (target.col(sourceColName), source.col(sourceColName))
+        }: _*) + (target.col("META_UPDATED_AT") -> current_timestamp())
 
       Success(
         target
@@ -67,26 +64,26 @@ object Step06_UpdateOrdersProcedure extends WithLocalSession with WithWHResize w
     if (!tableExists(session, "HARMONIZED", "ORDERS")) {
       createOrdersTable(session) match {
         case Failure(exception) => {
-          logger error s"Could not create table ORDERS, reason: $exception"
+          logger.error(s"Could not create table ORDERS, reason: $exception")
           System exit 1
         }
-        case Success(value) => logger info "Created table ORDERS"
+        case Success(_) => logger.info("Created table ORDERS")
       }
       createOrdersStream(session) match {
         case Failure(exception) => {
-          logger error s"Could not create stream ORDERS, reason: $exception"
+          logger.error(s"Could not create stream ORDERS, reason: $exception")
           System exit 1
         }
-        case Success(value) => logger info "Created stream on ORDERS"
+        case Success(_) => logger info "Created stream on ORDERS"
       }
     }
 
     mergeOrderUpdates(session) match {
       case Failure(exception) => {
-        logger error s"Could not merge updates to ORDERS, reason: $exception"
+        logger.error(s"Could not merge updates to ORDERS, reason: $exception")
         System exit 1
       }
-      case Success(value) => logger info "Merged updates to ORDERS"
+      case Success(_) => logger.info("Merged updates to ORDERS")
     }
 
     "Successfully processed ORDERS"
