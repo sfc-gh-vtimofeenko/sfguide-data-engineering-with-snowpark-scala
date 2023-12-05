@@ -1,7 +1,9 @@
 URL=https://REPLACE_ME.snowflakecomputing.com
 USER=REPLACE_ME
-PRIVATE_KEY_FILE=/PATH_TO_PRIVATE_KEY/private_key.p8
-ROLE=java_de_role
-WAREHOUSE=java_de_wh
-DB=java_de_db
+PASSWORD=REPLACE_ME
+# Or use private key auth...
+#PRIVATE_KEY_FILE=/PATH_TO_PRIVATE_KEY/private_key.p8
+ROLE=scala_de_role
+WAREHOUSE=scala_de_wh
+DB=scala_de_db
 SCHEMA=harmonized

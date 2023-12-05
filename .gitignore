@@ -36,3 +36,10 @@ snowflake.properties
 
 ### Logs
 logs/
+
+### Various build/local/IDE artifacts
+.bloop/
+.bsp/
+.direnv/
+.metals/
+project/

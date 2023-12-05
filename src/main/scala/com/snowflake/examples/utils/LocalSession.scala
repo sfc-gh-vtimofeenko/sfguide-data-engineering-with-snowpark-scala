@@ -8,6 +8,7 @@ import java.util.Properties
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
+import scala.collection.JavaConverters._
 
 object LocalSession {
 
@@ -20,9 +21,11 @@ object LocalSession {
     Success(
       Session.builder
         .configs(
-          Map(Seq("URL", "USER", "PASSWORD", "DB", "SCHEMA", "ROLE", "WAREHOUSE") map { key =>
-            (key, prop.getProperty(key))
-          }: _*)
+          prop
+            .stringPropertyNames()
+            .asScala
+            .map(key => key -> prop.getProperty(key))
+            .toMap
         )
         .create
     )
