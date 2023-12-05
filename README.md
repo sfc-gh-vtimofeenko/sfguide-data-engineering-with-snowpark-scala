@@ -24,6 +24,10 @@ The following is required:
  <summary>Packages setup</summary>
  
  Use your package manager of choice to install the aforementioned packages or if Nix and direnv are installed, run `direnv allow` which will pull in all the needed packages and set up the environment.
+
+ *Note*: Nix/direnv combination is entirely optional. It does greatly simplify the packages installation.
+
+ If using Nix, make sure to enable the "flakes" experimental feature.
 </details>
 
 <details>
