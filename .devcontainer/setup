@@ -2,6 +2,8 @@
 
 # Add devshell setup to the bash shell
 echo 'eval "$(direnv hook bash)"' >> /home/vscode/.bashrc
+
+echo 'source ~/.nix-profile/etc/profile.d/hm-session-vars.sh' >> /home/vscode/.profile
 # Snowsql setup 
 # It's being used for cli and extension authentication
 mkdir -p ~/.snowsql
@@ -17,8 +19,10 @@ dbname = HOL_DB
 EOF
 
 # Whitelist the workspace 
-mkdir -p ~/.config/direnv
-cat <<EOF > ~/.config/direnv/direnv.toml
-[whitelist]
-prefix = ["/workspaces"]
-EOF
+# mkdir -p ~/.config/direnv
+# cat <<EOF > ~/.config/direnv/direnv.toml
+# [whitelist]
+# prefix = ["/workspaces"]
+# EOF
+# 
+home-manager switch --flake /workspaces/sfguide-data-engineering-with-snowpark-scala

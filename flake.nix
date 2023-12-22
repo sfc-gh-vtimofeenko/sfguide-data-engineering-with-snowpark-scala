@@ -3,7 +3,9 @@
 
   inputs = {
     # NOTE: transitive inputs are not pinned to ensure reproducibility at the cost of disk space
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    home-manager.url = "github:rycee/home-manager/release-23.11";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
     # nixpkgs-lib.url = "github:NixOS/nixpkgs/nixos-unstable?dir=lib";
     snowcli.url = "github:sfc-gh-vtimofeenko/snowcli?ref=nix-flake&dir=contrib/nix";
     devshell.url = "github:numtide/devshell";
@@ -28,6 +30,36 @@
           ];
           config = { };
         };
+
+        legacyPackages.homeConfigurations.vscode = inputs.home-manager.lib.homeManagerConfiguration ({
+          inherit pkgs;
+          modules = [
+            {
+              home.stateVersion = "22.11";
+              home.username = "vscode";
+              home.homeDirectory = "/home/vscode";
+              home.sessionVariables = {
+                JAVA_HOME = pkgs.temurin-bin-11;
+              };
+              home.packages = [
+                pkgs.jc
+                pkgs.jq
+              ];
+              programs.direnv = {
+                enable = true;
+                nix-direnv.enable = true;
+                config = {
+                  whitelist = {
+                    prefix = [ "/workspaces" ];
+                  };
+                };
+              };
+
+            }
+          ];
+        }
+        );
+
 
         devshells.default =
           let

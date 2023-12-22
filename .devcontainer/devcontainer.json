@@ -8,6 +8,9 @@
         // Add nix so it can pull snowcli and pinned Scala
         "ghcr.io/devcontainers/features/nix:1": {
             "multiUser": false,
+            "packages": "home-manager",
+            // Install specific version of Java
+            "flakeUri": "github:sfc-",
             // Comma-separated
             "extraNixConfig": "experimental-features = nix-command flakes auto-allocate-uids configurable-impure-env,warn-dirty = false"
         },
