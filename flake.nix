@@ -31,6 +31,8 @@
           config = { };
         };
 
+        packages.default = pkgs.temurin-bin-11;
+
         legacyPackages.homeConfigurations.vscode = inputs.home-manager.lib.homeManagerConfiguration ({
           inherit pkgs;
           modules = [

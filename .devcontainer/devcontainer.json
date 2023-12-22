@@ -10,7 +10,7 @@
             "multiUser": false,
             "packages": "home-manager",
             // Install specific version of Java
-            "flakeUri": "github:sfc-",
+            "flakeUri": "github:sfc-gh-vtimofeenko/sfguide-data-engineering-with-snowpark-scala?ref=move-to-home-manager#",
             // Comma-separated
             "extraNixConfig": "experimental-features = nix-command flakes auto-allocate-uids configurable-impure-env,warn-dirty = false"
         },
