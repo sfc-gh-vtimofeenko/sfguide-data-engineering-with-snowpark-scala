@@ -1,0 +1,30 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/java
+{
+    "name": "Scala devcontainer",
+    // Bookworm for max compatibility. The actual dev dependencies are handles by nix
+    "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+    "features": {
+        // Add nix so it can pull snowcli and pinned Scala
+        "ghcr.io/devcontainers/features/nix:1": {
+            "multiUser": false,
+            // Comma-separated
+            "extraNixConfig": "experimental-features = nix-command flakes auto-allocate-uids configurable-impure-env,warn-dirty = false"
+        },
+        "ghcr.io/devcontainers-contrib/features/direnv:1": {}
+    },
+    "postCreateCommand": "./.devcontainer/setup",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "metals.javaHome": "${env:JAVA_HOME}"
+            },
+            "extensions": [
+                "snowflake.snowflake-vsc", // Run Snowflake commands directly
+                "scalameta.metals", // Scala-specific
+                //"Rubymaniac.vscode-direnv" // For direnv
+                "mkhl.direnv"
+            ]
+        }
+    }
+}

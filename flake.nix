@@ -6,10 +6,8 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     # nixpkgs-lib.url = "github:NixOS/nixpkgs/nixos-unstable?dir=lib";
     snowcli.url = "github:sfc-gh-vtimofeenko/snowcli?ref=nix-flake&dir=contrib/nix";
-    scala-seed.url = "github:devinsideyou/scala-seed/67430de28c463fe2c864c6b7a9bc4ee5fa3ebf73";
+    devshell.url = "github:numtide/devshell";
     treefmt-nix.url = "github:numtide/treefmt-nix";
-    # TODO: some sort of motd mergeable with scala-seed devshell, like mission-control?
-    # devshell.url = "github:numtide/devshell";
   };
 
   outputs = inputs@{ flake-parts, ... }:
@@ -17,11 +15,21 @@
     #   inherit (inputs.nixpkgs-lib) lib;
     # in
     flake-parts.lib.mkFlake { inherit inputs; } {
-      imports = [ inputs.treefmt-nix.flakeModule ];
+      imports = [ inputs.treefmt-nix.flakeModule inputs.devshell.flakeModule ];
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
       perSystem = { config, self', inputs', pkgs, system, ... }: {
-        devShells.default = inputs'.scala-seed.devShells.java11.overrideAttrs (prev:
-          /* add snowcli connection wrapper with .envrc values */
+        _module.args.pkgs = import inputs.nixpkgs {
+          inherit system;
+          overlays = [
+            (final: prev: {
+              jdk = pkgs.temurin-bin-11;
+              jre = pkgs.temurin-bin-11;
+            })
+          ];
+          config = { };
+        };
+
+        devshells.default =
           let
             snowCliWrapped = pkgs.writeShellApplication {
               name = "snow";
@@ -43,9 +51,22 @@
             };
           in
           {
-            buildInputs = prev.buildInputs ++ [ snowCliWrapped pkgs.scalafix pkgs.maven pkgs.jc pkgs.jq ];
-          })
-        ;
+            env = [
+              {
+                name = "JAVA_HOME";
+                value = pkgs.temurin-bin-11;
+              }
+            ];
+            commands = [ ];
+            packages = [
+              snowCliWrapped
+              pkgs.maven
+              pkgs.jc
+              pkgs.jq
+              pkgs.sbt
+            ];
+          };
+
         treefmt.programs = {
           nixpkgs-fmt.enable = true;
           scalafmt.enable = true;
